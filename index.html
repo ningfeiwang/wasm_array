@@ -1,0 +1,38 @@
+<!doctype html>
+<html>
+    <head>
+        <meta charset="utf-8"/>
+    </head>
+    
+  <script src="writebmp.js"></script>
+  <script>
+    MyCode().then(function(Module) {
+        // this is reached when everything is ready, and you can call methods on Module
+        fillArray = Module.cwrap('fillArray', null, ['number', 'number']);
+        var nByte = Float32Array.BYTES_PER_ELEMENT;
+        var length = 5;
+
+        var typedArray = new Float32Array([1.1 , 2.3 , 3.5 , 4.6 , 3.2]);
+        console.log(typedArray);
+        //inputs
+        var buffer = Module._malloc(length*nByte);
+        Module.HEAPF32.set(typedArray, buffer >> 2);
+        //function in cxx
+        fillArray(buffer, length);
+        //get result array
+        var get_arr = function(Module, buf, length, nByte, type)
+        {
+            var res = [];
+            for (var i = 0; i < length; i++)
+            {
+                res[i] = Module.getValue(buf+i*nByte, type);
+            }
+            return res;
+
+        }
+        var res = get_arr(Module, buffer, length, nByte, 'float');
+        console.log(res);
+    });
+    
+  </script>
+</html>
